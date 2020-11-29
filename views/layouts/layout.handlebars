@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@100;400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/css/trix.css">
+    <link rel="stylesheet" href="/css/app.css">
+
+    <title>{{nombrePagina}}</title>
+</head>
+
+<body>
+    <div class="nombre-sitio contenedor">
+        <h1>
+            <a href="/">DevJobs</a>
+        </h1>
+
+        {{#if barra}}
+        <div class="buscador">
+            <form action="#">
+                <input type="text" name="buscar">
+                <input type="submit" value="Buscar">
+            </form>
+        </div>
+        {{/if}}
+    </div>
+    <header class="site-header contenedor separador">
+        <h2>{{nombrePagina}}</h2>
+        {{#if tagline}}
+        <p class="tagline">{{tagline}}</p>
+        {{/if}}
+        {{#if boton}}
+        <a href="/vacante/nueva" class="btn btn-azul">Publicar vacante nueva</a>
+        {{/if}}
+    </header>
+
+    <div class="contenido-principal contenedor">
+        {{#if mensajes}}
+        <div class="alertas">
+            {{#mostrarAlertas mensajes}}
+            {{/mostrarAlertas}}
+        </div>
+        {{/if}}
+
+        {{{body}}}
+    </div>
+    <script type="text/javascript" src="/js/trix.js"></script>
+    <script src="/dist/bundle.js"></script>
+    {{!-- <script src="/js/trix.js"></script> --}}
+</body>
+
+</html>

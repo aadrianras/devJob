@@ -1,0 +1,106 @@
+
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    //Eliminamos las alertas de la pantalla si existen
+    let alertas = document.querySelector('.alertas');
+    if (alertas) {
+        limpiarAlertas(alertas);
+    }
+
+    const skills = document.querySelector('.lista-conocimientos');
+    if (skills) {
+        skills.addEventListener('click', agregarSkills);
+
+        //Revisa las opciones cuando ingresamos desde editar vacante
+        skillsSeleccionadas();
+    }
+})
+
+
+
+const skills = new Set();
+
+const agregarSkills = (e) => {
+    e.preventDefault();
+    if (e.target.tagName === 'LI') {
+        if (!e.target.classList.contains('activo')) {
+            //SI SE SELECCIONA AGREGA AL SET Y LO MARCA COMO ACTIVO
+            e.target.classList.add('activo');
+            skills.add(e.target.textContent);
+        } else {
+            //SI SE SELECCIONA ESTANDO ACTIVO LO DESACTIVA Y LO ELIMINA DEL SET
+            e.target.classList.remove('activo');
+            skills.delete(e.target.textContent);
+        }
+
+    }
+    const skillsArray = [...skills];
+    document.querySelector('#skills').value = skillsArray;
+}
+
+const skillsSeleccionadas = () => {
+    let seleccionadas = document.querySelectorAll('.lista-conocimientos .activo');
+    seleccionadas = Array.from(seleccionadas);
+    seleccionadas = seleccionadas.map(seleccionada => seleccionada.innerText);
+    seleccionadas.forEach(s => skills.add(s));
+    const skillsArray = [...skills];
+    document.querySelector('#skills').value = skillsArray;
+}
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+//VERIFICAMOS QUE LA CONTRASEÑA Y LA REPETICION DE CONTRASEÑA SEAN IGUALES AL REGISTRAR UN USUARIO
+///////////////////////////////////////////////////////////////////////////////
+
+const contraseniaUsuario = document.getElementById('UsuarioContrasenia');
+const contraseniaUsuarioRep = document.getElementById('UsuarioContraseniaRepeticion');
+const btnSubmitRegistro = document.getElementById('btnSubmitRegistro');
+
+//Si existen los campos valida los contenidos
+if (contraseniaUsuarioRep !== null) {
+    contraseniaUsuarioRep.addEventListener('input', contraseniasIguales);
+
+    function contraseniasIguales() {
+        if (contraseniaUsuario.value !== contraseniaUsuarioRep.value) {
+            contraseniaUsuario.style.background = '#ffb0b0';
+            contraseniaUsuarioRep.style.background = '#ffb0b0';
+            btnSubmitRegistro.disabled = true;
+            btnSubmitRegistro.classList = ('btn btn-rojo');
+        };
+
+        if (contraseniaUsuario.value === contraseniaUsuarioRep.value) {
+            contraseniaUsuario.style.background = '#cee397';
+            contraseniaUsuarioRep.style.background = '#cee397';
+            btnSubmitRegistro.disabled = false;
+            btnSubmitRegistro.classList = ('btn btn-azul');
+
+        };
+        return;
+    }
+
+}
+
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+//Funcion para eliminar las alertas de la pantalla si existen
+///////////////////////////////////////////////////////////////////////////////
+function limpiarAlertas(alertas) {
+
+    const interval = setInterval(() => {
+        if (alertas.children.length > 0) {
+            alertas.removeChild(alertas.children[0]);
+        } else {
+            alertas.remove();
+            clearInterval(interval);
+        }
+    }, 2000);
+
+
+}
+
