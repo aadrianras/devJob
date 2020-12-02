@@ -4,7 +4,6 @@ const homeController = require('../controllers/homeController');
 const vacanteController = require('../controllers/vacanteController');
 const usuariosController = require('../controllers/usuariosController');
 const authController = require('../controllers/authController');
-const { check } = require('express-validator');
 
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -14,20 +13,25 @@ router.get('/', homeController.mostrarTrabajos);
 
 
 
-
 ///////////////////////////////////////////////////////////////////////////////////
 //VACANTES
 ///////////////////////////////////////////////////////////////////////////////////
 
 router.get('/vacante/nueva', authController.verificarUsuario, vacanteController.formularioNuevaVacante);
-router.post('/vacante/nueva', authController.verificarUsuario, vacanteController.agregarVacante);
+router.post('/vacante/nueva', authController.verificarUsuario, vacanteController.validarVacante, vacanteController.agregarVacante);
 
-//Mostramos una vacante
+//MOSTRAMOS VACANTE
 router.get('/vacante/:url', vacanteController.mostrarVacante);
 
 //EDITAMOS UNA VACANTE
 router.get('/vacante/editar/:url', authController.verificarUsuario, vacanteController.formEditarVacante);
-router.post('/vacante/editar/:url', authController.verificarUsuario, vacanteController.actualizarVacante);
+router.post('/vacante/editar/:url', authController.verificarUsuario, vacanteController.validarVacante, vacanteController.actualizarVacante);
+
+//ELIMINAMOS UNA VACANTE
+router.delete('/vacante/eliminar/:id', authController.verificarUsuario, vacanteController.eliminarVacante);
+
+
+
 
 ///////////////////////////////////////////////////////////////////////////////////
 //CUENTA USUARIO
@@ -55,8 +59,9 @@ router.get('/administracion', authController.verificarUsuario, authController.mo
 
 //Editar perfil de usuario
 router.get('/editar-perfil', authController.verificarUsuario, usuariosController.editarPerfil);
+
 //Actualizamos los valores modificados del perfil
-router.post('/editar-perfil', authController.verificarUsuario, usuariosController.actualizarPerfil);
+router.post('/editar-perfil', authController.verificarUsuario, usuariosController.validarCamposEdicionPerfil, usuariosController.actualizarPerfil);
 
 
 

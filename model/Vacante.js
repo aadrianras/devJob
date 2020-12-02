@@ -11,7 +11,8 @@ const vacantesSchema = new Schema({
     },
     empresa: {
         type: String,
-        trim: true
+        trim: true,
+        required: 'La empresa es obligatoria'
     },
     ubicacion: {
         type: String,

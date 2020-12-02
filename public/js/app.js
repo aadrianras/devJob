@@ -1,3 +1,6 @@
+import axios from 'axios';
+import Swal from 'sweetalert2';
+
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -83,10 +86,6 @@ if (contraseniaUsuarioRep !== null) {
 
 }
 
-
-
-
-
 ///////////////////////////////////////////////////////////////////////////////
 //Funcion para eliminar las alertas de la pantalla si existen
 ///////////////////////////////////////////////////////////////////////////////
@@ -103,4 +102,66 @@ function limpiarAlertas(alertas) {
 
 
 }
+
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+//FUNCIONALIDADES EN EL PANEL ADMINISTRATIVO - BOTONES
+///////////////////////////////////////////////////////////////////////////////
+const vacantesListado = document.querySelector('.panel-administracion');
+if (vacantesListado) {
+    vacantesListado.addEventListener('click', accionesListado);
+}
+
+//ELIMINAMOS VACANTES
+function accionesListado(e) {
+    e.preventDefault();
+    if (e.target.dataset.eliminar) {
+        //Eliminamos por medio de axios
+        Swal.fire({
+            title: 'Estas seguro de eliminar esta vacante?',
+            text: "Se eliminará definitivamente!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Si, eliminar!',
+            cancelButtonText: 'No, cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                //SI ACEPTA ELIMINAR LA VACANTE ENVIAMOS UNA PETICION A LA DB
+                axios.delete(`/vacante/eliminar/${e.target.dataset.eliminar}`)
+                    .then(res => {
+                        //MENSAJE DE CONFIRMACIÓN DE QUE TODO SALIO BIEN
+                        Swal.fire(
+                            'Eliminada!',
+                            `${res.data.message}`,
+                            'success'
+                        );
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    }
+                    )
+                    .catch(err => {
+                        console.log(err);
+                        Swal.fire(
+                            'Eliminada!',
+                            `${err.data.message}`,
+                            'warning'
+                        );
+                    });
+            }
+        }).catch(err => console.log(err));
+
+    } else {
+        window.location.href = e.target.href;
+    }
+}
+
+
+
+
+
 

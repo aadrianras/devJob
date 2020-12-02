@@ -8,25 +8,25 @@
     <h2>Tus vacantes</h2>
     <div class="panel-administracion">
         {{#if vacantesUsuario.length}}
-            {{#each vacantesUsuario}}
-                <div class="vacante">
-                    <div class="caja">
-                        <h3>{{empresa}}</h3>
-                        <p class="puesto">{{titulo}}</p>
-                    </div>     
-                    <div class="centrar-vertical caja">
-                        <a href="/candidatos/{{id}}" class="btn btn-amarillo">Candidatos</a>
-                    </div>
-                    <div class="centrar-vertical caja">
-                        <a href="/editar/{{url}}" class="btn btn-verde">Editar vacante</a>
-                    </div>
-                    <div class="centrar-vertical caja">
-                        <a href="#" data-eliminar="{{id}}" class="btn btn-rojo">Eliminar</a>
-                    </div>
-                </div>
-            {{/each}}            
+        {{#each vacantesUsuario}}
+        <div class="vacante">
+            <div class="caja">
+                <h3>{{empresa}}</h3>
+                <p class="puesto">{{titulo}}</p>
+            </div>
+            <div class="centrar-vertical caja">
+                <a href="/candidatos/{{_id}}" class="btn btn-amarillo">Candidatos</a>
+            </div>
+            <div class="centrar-vertical caja">
+                <a href="/vacante/editar/{{url}}" class="btn btn-verde">Editar vacante</a>
+            </div>
+            <div class="centrar-vertical caja">
+                <a href="#" data-eliminar="{{_id}}" class="btn btn-rojo">Eliminar</a>
+            </div>
+        </div>
+        {{/each}}
         {{else}}
-            <p>No existen vacantes activas</p>    
+        <p>No existen vacantes activas</p>
         {{/if}}
     </div>
 </main>

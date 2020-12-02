@@ -1,5 +1,5 @@
 const Usuario = require('../model/Usuario');
-const { validationResult, check } = require('express-validator');
+const { validationResult, check, body } = require('express-validator');
 
 
 const formCrearCuenta = (req, res) => {
@@ -94,9 +94,42 @@ const editarPerfil = async (req, res, next) => {
     });
 };
 
+
+
+//VALIDAMOS LOS CAMPOS DE LA EDICION DEL PERFIL DE USUARIO
+const validarCamposEdicionPerfil = [
+    body('nombre').trim().escape(),
+    body('email').trim().escape(),
+    check('nombre').not().isEmpty().withMessage('El nombre no puede estar vacio'),
+    check('email').not().isEmpty().withMessage('El email no puede estar vacio')
+
+];
+
+
 //Actualiza la informacion del usuario
 const actualizarPerfil = async (req, res) => {
+
     const { user, body } = req;
+
+    //VERIFICAMOS SI LOS MIDDLEWARE DE VERIFICACION ENVIAN ERRORES
+    const error = validationResult(req);
+    if (!error.isEmpty()) {
+        req.flash('error', error.array().map(er => er.msg));
+        res.render('editar-perfil', {
+            nombrePagina: 'Edita tu perfil',
+            tagline: 'En esta página podras modificar y/o actualizar la información de tu perfil',
+            usuario: {
+                nombre: user.nombre,
+                email: user.email
+            },
+            cerrarSesion: true,
+            nombre: user.nombre,
+            mensajes: req.flash()
+        });
+        return;
+    };
+
+    //ACTUALIZAMOS LA INFORMACION SI LOS CAMPOS SON VALIDOS
     await Usuario.findById({ _id: user._id }, async (err, usuarioDB) => {
         if (err) {
             throw new Error(err, 'Ocurrio un problema al obtener la informacion del usuario para actualizar');
@@ -129,5 +162,6 @@ module.exports = {
     formIniciarSesion,
     editarPerfil,
     actualizarPerfil,
-    cerrarSesion
+    cerrarSesion,
+    validarCamposEdicionPerfil
 }
