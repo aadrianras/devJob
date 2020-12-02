@@ -7,19 +7,17 @@ const formCrearCuenta = (req, res) => {
         nombrePagina: 'Crea tu cuenta',
         tagline: 'Comienza a publicar tus vacantes, solo debes crear una cuenta'
     })
-}
+};
 
+
+
+//Middleware de validacion de campos para el registro de usuario
 const validacionRegistro = [
     check('nombre', 'Nombre con minimo 3 letras').isLength({ min: 3 }),
     check('nombre', 'El nombre no puede estar vacio').not().isEmpty().escape().trim(),
     check('email', 'Agrega un mail valido').isEmail(),
     check('password', 'La contraseña debe ser 6 letras minimo').isLength({ min: 6 })
 ];
-
-
-
-
-
 
 //Creamos el usuario en la DB
 const crearUsuario = async (req, res, next) => {
@@ -65,11 +63,62 @@ const formIniciarSesion = (req, res) => {
     })
 }
 
-
-//Si los datos son correctos inicia sesion y envia al dashboard
-const iniciarSesion = (req, res, next) => {
-    //Aqui quedamos
+//Cerrar sesion
+const cerrarSesion = (req, res) => {
+    req.logout();
+    req.flash('correcto', 'Sesión finalizada');
+    return res.redirect('/iniciar-sesion');
 }
+
+
+
+//Envia al form para editar usuario
+const editarPerfil = async (req, res, next) => {
+    const { user } = req;
+    await Usuario.findById({ _id: user._id }, (err, usuarioDB) => {
+        if (err) {
+            throw new Error(err, 'Ocurrio un problema al autenticar tu cuenta');
+        };
+
+        //Si no hay error mostramos el formulario con la info del usuario
+        res.render('editar-perfil', {
+            nombrePagina: 'Edita tu perfil',
+            tagline: 'En esta página podras modificar y/o actualizar la información de tu perfil',
+            usuario: {
+                nombre: usuarioDB.nombre,
+                email: usuarioDB.email
+            },
+            cerrarSesion: true,
+            nombre: user.nombre
+        });
+    });
+};
+
+//Actualiza la informacion del usuario
+const actualizarPerfil = async (req, res) => {
+    const { user, body } = req;
+    await Usuario.findById({ _id: user._id }, async (err, usuarioDB) => {
+        if (err) {
+            throw new Error(err, 'Ocurrio un problema al obtener la informacion del usuario para actualizar');
+        };
+
+        //Actualizamos la informacion del usuario con la del form
+        usuarioDB.nombre = body.nombre;
+        usuarioDB.email = body.email;
+        if (body.password) {
+            usuarioDB.password = body.password;
+        };
+
+        await usuarioDB.save((err, usuarioGuardado) => {
+            if (err) {
+                throw new Error(err, 'Ocurrio un problema al actualizar la informacion del usuario');
+            };
+            req.flash('correcto', 'Cambios guardados correctamente');
+            res.redirect('/administracion');
+        })
+    })
+};
+
 
 
 
@@ -78,5 +127,7 @@ module.exports = {
     crearUsuario,
     validacionRegistro,
     formIniciarSesion,
-    iniciarSesion
+    editarPerfil,
+    actualizarPerfil,
+    cerrarSesion
 }

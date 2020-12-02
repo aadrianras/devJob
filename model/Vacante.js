@@ -35,6 +35,11 @@ const vacantesSchema = new Schema({
         lowercase: true
     },
     skills: [String],
+    autor: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Usuario',
+        required: 'El autor es obligatorio'
+    },
     candidatos: [{
         nombre: String,
         email: String,

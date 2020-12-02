@@ -10,6 +10,7 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
 const bodyParser = require('body-parser');
 const flash = require('connect-flash');
+const passport = require('./config/passport');
 
 require('dotenv').config({ path: 'variables.env' });
 
@@ -42,7 +43,12 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     store: new MongoStore({ mongooseConnection: db })
-}))
+}));
+
+
+//Inicializamos passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 
 
@@ -52,6 +58,13 @@ app.use(flash());
 app.use((req, res, next) => {
     res.locals.mensajes = req.flash();
     next();
+});
+
+app.use((error, req, res, next) => {
+    res.status(400).json({
+        status: 'error',
+        message: error.message
+    })
 })
 
 

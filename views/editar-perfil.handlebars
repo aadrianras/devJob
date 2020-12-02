@@ -1,0 +1,27 @@
+<main class="contenedor">
+    <form action="/editar-perfil" method="POST" class="default-form">
+        <div class="campo">
+            <label for="nombre">Nombre</label>
+            <input type="text" name="nombre" placeholder="Ingresa tu nombre" value="{{usuario.nombre}}">
+        </div>
+        <div class="campo">
+            <label for="email">Email</label>
+            <input type="text" name="email" placeholder="Ingresa tu correo" value="{{usuario.email}}">
+        </div>
+        <div class="campo">
+            <label for="password">Contraseña</label>
+            <input type="password" name="password" placeholder="Ingresa la nueva contraseña solo si deseas actualizarla" id="UsuarioContrasenia">
+        </div>
+        <div class="campo">
+            <label for="passwordRepetido">Repetir contraseña</label>
+            <input type="password" name="passwordRepetido" placeholder="Repite tu nueva contraseña"
+                id="UsuarioContraseniaRepeticion">
+        </div>
+        <div class="campo acciones">
+            <a href="/administracion">Volver al panel de administración</a>
+        </div>
+        <div class="campo">
+            <input type="submit" value="actualizar" class="btn btn-rojo" id="btnSubmitRegistro">
+        </div>
+    </form>
+</main>

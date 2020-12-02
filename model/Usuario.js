@@ -35,6 +35,7 @@ usuarioSchema.pre('save', async function (next) {
     next();
 });
 
+//Manejamos los errores en el intento de registro de usuario nuevo
 usuarioSchema.post('save', function (error, doc, next) {
     if (error.name === 'MongoError' && error.code == 11000) {
         next('Ese email ya esta registrado');
@@ -43,7 +44,16 @@ usuarioSchema.post('save', function (error, doc, next) {
     } else {
         next(error);
     }
-})
+});
+
+
+//Autenticamos usuario
+usuarioSchema.methods = {
+    compararPassword: function (password) {
+        return bcrypt.compareSync(password, this.password);
+    }
+}
+
 
 const Usuario = mongoose.model('Usuario', usuarioSchema);
 

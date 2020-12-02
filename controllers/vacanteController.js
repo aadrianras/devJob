@@ -6,12 +6,17 @@ const Vacante = mongoose.model('Vacante');
 const formularioNuevaVacante = (req, res) => {
     res.render('nueva-vacante', {
         nombrePagina: 'Nueva vacante',
-        tagline: 'Llena el formulario y publica el trabajo'
+        tagline: 'Llena el formulario y publica el trabajo',
+        cerrarSesion: true,
+        nombre: req.user.nombre
     })
 };
 
 const agregarVacante = async (req, res) => {
     const vacante = new Vacante(req.body);
+
+    //Agregamos al autor de la vacante antes de guardar
+    vacante.autor = req.user._id;
 
     //crear arreglo de habilidades (skills)
     vacante.skills = req.body.skills.split(',');
@@ -50,7 +55,9 @@ const formEditarVacante = async (req, res) => {
             }
             res.render('editar-vacante', {
                 vacanteDB,
-                nombrePagina: `Editando: ${vacanteDB.titulo}`
+                nombrePagina: `Editando: ${vacanteDB.titulo}`,
+                cerrarSesion: true,
+                nombre: req.user.nombre
             })
         });
 }
@@ -66,15 +73,20 @@ const actualizarVacante = async (req, res) => {
 
     await Vacante.findOneAndUpdate({ url }, vacanteActualizada, { new: true, runValidators: true }, (err, vacanteDB) => {
         if (err) {
-            console.log("No se pudo actualizar la info!");
+            console.log(err, "No se pudo actualizar la info!");
         }
         //ACTUALIZAMOS LA INFORMACION}
         console.log("Vacante actualizada correctamente")
         res.redirect(`/vacante/${vacanteDB.url}`);
     });
 
+};
 
 
+
+const validarVacante = (req, res) => {
+
+    //Hay que sanitizar y validar los campos como en user
 };
 
 
@@ -83,5 +95,6 @@ module.exports = {
     agregarVacante,
     mostrarVacante,
     formEditarVacante,
-    actualizarVacante
+    actualizarVacante,
+    validarVacante
 }
