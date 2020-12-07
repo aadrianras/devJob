@@ -1,6 +1,9 @@
 const mongoose = require('mongoose');
 const Vacante = mongoose.model('Vacante');
 const { validationResult, body, check } = require('express-validator');
+const multer = require('multer');
+const shortid = require('shortid');
+
 
 
 //CREA UNA NUEVA VACANTE
@@ -9,7 +12,8 @@ const formularioNuevaVacante = (req, res) => {
         nombrePagina: 'Nueva vacante',
         tagline: 'Llena el formulario y publica el trabajo',
         cerrarSesion: true,
-        nombre: req.user.nombre
+        nombre: req.user.nombre,
+        imagen: req.user.imagen
     })
 };
 
@@ -58,25 +62,33 @@ const agregarVacante = async (req, res) => {
     //ALMACENAMOS EN LA BASE DE DATOS
     const nuevaVacante = await vacante.save();
     console.log(`Vacante ${nuevaVacante.titulo} creada`);
-    res.redirect(`/vacante/${nuevaVacante.url}`);
+    res.redirect(`/`);
 
 }
 
 //MOSTRAMOS UNA VACANTE
 const mostrarVacante = async (req, res, next) => {
     const { url } = req.params;
-    //Buscamos en la DB
-    const vacante = await Vacante.findOne({ url }).lean();
+    //BUSCAMOS EN LA DB
+    const vacante = await Vacante.findOne({ url })
+        .lean()
+        .populate('autor');
+
     if (!vacante) return next();
 
+    if (req.user) {
+        return res.render('vacante', {
+            nombrePagina: `Vacante: ${vacante.titulo}`,
+            vacante,
+            cerrarSesion: true,
+            nombre: req.user.nombre
+        });
+    };
     res.render('vacante', {
         nombrePagina: `Vacante: ${vacante.titulo}`,
-        vacante,
-        cerrarSesion: true,
-        nombre: req.user.nombre
-    })
-
-}
+        vacante
+    });
+};
 
 
 //VAMOS AL FORMULARIO PARA EDITAR UNA VACANTE
@@ -139,22 +151,121 @@ const actualizarVacante = async (req, res) => {
 
 //ELIMINA UNA VACANTE DE LA DB
 const eliminarVacante = async (req, res) => {
+    //ID de la vacante a eliminar
     const { id } = req.params;
-    await Vacante.deleteOne({ _id: id }, (err, respuesta) => {
-        if (err) {
-            res.status(400).json({
-                ok: false,
-                message: 'Ocurrio un problema intentando eliminar la vacante, intentalo nuevamente'
+    //ID del usuario autenticado
+    const { _id } = req.user;
+
+    //VERIFICAMOS QUE EL USUARIO AUTENTICADO SEA EL QUE CREO LA VACANTE
+    await Vacante.findById({ _id: id }, async (err, vacanteDB) => {
+        if (!vacanteDB.autor.equals(_id)) {
+            if (err) {
+                res.status(400).json({
+                    ok: false,
+                    message: 'Solo puedes eliminar vacantes creadar por ti'
+                })
+            };
+        } else {
+            await Vacante.deleteOne({ _id: id }, (err, r) => {
+                if (err) {
+                    res.status(400).json({
+                        ok: false,
+                        message: 'Ocurrio un problema intentando eliminar la vacante, intentalo nuevamente'
+                    })
+                }
+                console.log(`La vacante fue eliminada correctamente!`);
+                res.status(200).json({
+                    ok: true,
+                    message: `La vacante fue eliminada correctamente!`
+                })
             })
         }
-        console.log(`La vacante fue eliminada correctamente!`);
-        res.status(200).json({
-            ok: true,
-            message: `La vacante fue eliminada correctamente!`
+    });
+}
+
+
+/////////////////////////////////////////////////////////////////////////
+//MULTER
+//CONFIGURAMOS ALMACENAMIENTO Y NOMBRE
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, './public/uploads/candidatos/');
+    },
+    filename: (req, file, cb) => {
+        const extension = file.mimetype.split('/')[1];
+        cb(null, `${shortid.generate()}.${extension}`);
+    }
+})
+
+//CONFIGURAMOS LA SUBIDA DE ARCHIVOS PDF
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 20000000 },
+    fileFilter: function (req, file, cb) {
+        if (file.mimetype !== 'application/pdf') {
+            cb(new Error('Solo se permiten PDFs'));
+        } else {
+            cb(null, true);
+        };
+    }
+}).single('CV');
+
+
+//Verificamos que el CV este en PDF
+const subirCV = (req, res, next) => {
+    upload(req, res, (err) => {
+        if (err instanceof multer.MulterError) {
+            console.log('multer.MulterError', err.message);
+            req.flash('error', err.message)
+            res.redirect('back');
+            return;
+        } else if (err) {
+            req.flash('error', err.message)
+            res.redirect('back');
+            return;
+        };
+        next();
+    })
+}
+
+
+//Si todo esta bien contactamos
+const contactar = async (req, res) => {
+    const { url } = req.params;
+
+    if (req.file) {
+        //BUSCAMOS EN LA DB
+        await Vacante.findOne({ url }, (err, vacanteDB) => {
+            if (err) {
+                req.flash('error', 'Error al acceder a la vacante');
+                console.log(err);
+                return res.redirect('back');
+            };
+            console.log(vacanteDB);
+            //Debemos agregar al candidato y su CV a la vacante
+            const candidato = {
+                nombre: req.body.nombre,
+                email: req.body.email,
+                cv: req.file.filename
+            };
+            vacanteDB.candidatos.push(candidato);
+            vacanteDB.save().then(() => {
+
+                //Si todo salio bien volvemos a la vacante y enviamos un mensaje de confirmacion
+
+            }).catch(err => {
+
+
+            });
         })
     })
 }
 
+//SI NO RECIBIMOS UN ARCHIVO ENVIAMOS UN MENSAJE DE ERROR
+req.flash('error', 'El CV no pudo ser enviado, intentalo nuevamente')
+return res.redirect('back');
+};
+/////////////////////////////////////////////////////////////////////////
 
 
 
@@ -165,5 +276,7 @@ module.exports = {
     formEditarVacante,
     actualizarVacante,
     validarVacante,
-    eliminarVacante
+    eliminarVacante,
+    subirCV,
+    contactar
 }

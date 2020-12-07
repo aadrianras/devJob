@@ -418,6 +418,7 @@ p.candidatos {
 }
 .admin-perfil {
     width: 120px;
+    border-radius: 5px;
     align-self: flex-start;
     margin-right: 1rem;
 }

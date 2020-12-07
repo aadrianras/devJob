@@ -29,11 +29,14 @@
         {{/if}}
 
         {{#if cerrarSesion}}
-            <div class="cerrar-sesion">
-                <p>Hola! {{nombre}}</p>
-                <a href="/administracion">Panel de administración</a>
-                <a href="/cerrar-sesion">Cerrar sesión</a>
-            </div>
+        <div class="cerrar-sesion">
+            {{#if imagen}}
+            <img src="/uploads/perfiles/{{imagen}}" alt="Perfil" class="admin-perfil">
+            {{/if}}
+            <p>Hola! {{nombre}}</p>
+            <a href="/administracion">Panel de administración</a>
+            <a href="/cerrar-sesion">Cerrar sesión</a>
+        </div>
         {{/if}}
 
 

@@ -1,5 +1,5 @@
 <main class="contenedor">
-    <form action="/editar-perfil" method="POST" class="default-form">
+    <form action="/editar-perfil" method="POST" class="default-form" enctype="multipart/form-data">
         <div class="campo">
             <label for="nombre">Nombre</label>
             <input type="text" name="nombre" placeholder="Ingresa tu nombre" value="{{usuario.nombre}}" required>
@@ -17,6 +17,11 @@
             <label for="passwordRepetido">Repetir contraseña</label>
             <input type="password" name="passwordRepetido" placeholder="Repite tu nueva contraseña"
                 id="UsuarioContraseniaRepeticion">
+        </div>
+        <div class="campo">
+            <label for="imagenPerfil">Imagen</label>
+            <input type="file" name="imagenPerfil">
+            <img src="uploads/perfiles/{{usuario.imagen}}" alt="Perfil" class="admin-perfil">
         </div>
         <div class="campo acciones">
             <a href="/administracion">Volver al panel de administración</a>

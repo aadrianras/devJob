@@ -20,7 +20,8 @@ const usuarioSchema = new Schema({
         trim: true
     },
     token: String,
-    expira: Date
+    expira: Date,
+    imagen: String
 });
 
 

@@ -155,7 +155,7 @@ function accionesListado(e) {
             }
         }).catch(err => console.log(err));
 
-    } else {
+    } else if (e.target.tagName === 'A') {
         window.location.href = e.target.href;
     }
 }

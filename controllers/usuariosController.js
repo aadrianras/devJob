@@ -1,5 +1,37 @@
 const Usuario = require('../model/Usuario');
 const { validationResult, check, body } = require('express-validator');
+const multer = require('multer');
+const shortId = require('shortid');
+
+//OPCIONES DE MULTER
+const configuracionMulter = {
+    storage: fileStorage = multer.diskStorage({
+        destination: (req, file, cb) => {
+            cb(null, __dirname + '../../public/uploads/perfiles')
+        },
+        filename: (req, file, cb) => {
+            const extension = file.mimetype.split('/')[1];
+            cb(null, `${shortId.generate()}.${extension}`);
+        }
+    }),
+    fileFilter(req, file, cb) {
+        if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+            //el callback se ejecuta como true o false
+            cb(null, true);
+        } else {
+            cb(new Error('Formato no valido'));
+        }
+    },
+    limit: { fileSize: 100000 }
+}
+const upload = multer(configuracionMulter);
+
+
+//PERMITE SUBIR UNA IMAGEN EN LA PAGINA DE EDITAR PERFIL
+const subirImagen = upload.single('imagenPerfil');
+
+
+
 
 
 const formCrearCuenta = (req, res) => {
@@ -75,6 +107,7 @@ const cerrarSesion = (req, res) => {
 //Envia al form para editar usuario
 const editarPerfil = async (req, res, next) => {
     const { user } = req;
+
     await Usuario.findById({ _id: user._id }, (err, usuarioDB) => {
         if (err) {
             throw new Error(err, 'Ocurrio un problema al autenticar tu cuenta');
@@ -86,6 +119,7 @@ const editarPerfil = async (req, res, next) => {
             tagline: 'En esta página podras modificar y/o actualizar la información de tu perfil',
             usuario: {
                 nombre: usuarioDB.nombre,
+                imagen: usuarioDB.imagen,
                 email: usuarioDB.email
             },
             cerrarSesion: true,
@@ -100,8 +134,8 @@ const editarPerfil = async (req, res, next) => {
 const validarCamposEdicionPerfil = [
     body('nombre').trim().escape(),
     body('email').trim().escape(),
-    check('nombre').not().isEmpty().withMessage('El nombre no puede estar vacio'),
-    check('email').not().isEmpty().withMessage('El email no puede estar vacio')
+    check('nombre').isEmpty().withMessage('El nombre no puede estar vacio'),
+    check('email').isEmpty().withMessage('El email no puede estar vacio')
 
 ];
 
@@ -109,7 +143,8 @@ const validarCamposEdicionPerfil = [
 //Actualiza la informacion del usuario
 const actualizarPerfil = async (req, res) => {
 
-    const { user, body } = req;
+    const { user, body, file } = req;
+
 
     //VERIFICAMOS SI LOS MIDDLEWARE DE VERIFICACION ENVIAN ERRORES
     const error = validationResult(req);
@@ -123,6 +158,7 @@ const actualizarPerfil = async (req, res) => {
                 email: user.email
             },
             cerrarSesion: true,
+            imagen: user.imagen,
             nombre: user.nombre,
             mensajes: req.flash()
         });
@@ -141,6 +177,10 @@ const actualizarPerfil = async (req, res) => {
         if (body.password) {
             usuarioDB.password = body.password;
         };
+        if (file) {
+            usuarioDB.imagen = file.filename;
+        };
+
 
         await usuarioDB.save((err, usuarioGuardado) => {
             if (err) {
@@ -155,6 +195,9 @@ const actualizarPerfil = async (req, res) => {
 
 
 
+
+
+
 module.exports = {
     formCrearCuenta,
     crearUsuario,
@@ -163,5 +206,6 @@ module.exports = {
     editarPerfil,
     actualizarPerfil,
     cerrarSesion,
-    validarCamposEdicionPerfil
+    validarCamposEdicionPerfil,
+    subirImagen
 }

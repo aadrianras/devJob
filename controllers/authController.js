@@ -33,6 +33,7 @@ const mostrarPanel = async (req, res) => {
         tagline: 'Crea y administra tus vacantes',
         cerrarSesion: true,
         nombre: req.user.nombre,
+        imagen: req.user.imagen,
         vacantesUsuario
     })
 }

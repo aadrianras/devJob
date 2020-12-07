@@ -61,10 +61,13 @@ router.get('/administracion', authController.verificarUsuario, authController.mo
 router.get('/editar-perfil', authController.verificarUsuario, usuariosController.editarPerfil);
 
 //Actualizamos los valores modificados del perfil
-router.post('/editar-perfil', authController.verificarUsuario, usuariosController.validarCamposEdicionPerfil, usuariosController.actualizarPerfil);
+router.post('/editar-perfil', authController.verificarUsuario, usuariosController.validarCamposEdicionPerfil, usuariosController.subirImagen, usuariosController.actualizarPerfil);
 
 
+//Recibimos los mensajes de los candidatos
 
+//Debemos validar los campos del form
+router.post('/vacante/:url', authController.verificarUsuario, vacanteController.subirCV, vacanteController.contactar);
 
 
 
